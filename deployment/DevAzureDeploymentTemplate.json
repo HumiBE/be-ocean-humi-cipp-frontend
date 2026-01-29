@@ -57,6 +57,13 @@
       "metadata": {
         "description": "URL to your Github backend fork."
       }
+    },
+    "KeyVaultName": {
+      "defaultValue": "",
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Key Vault. If empty, uses the auto-generated name based on baseName."
+      }
     }
   },
   "variables": {
@@ -65,12 +72,13 @@
     "funcStorageName": "[tolower(concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),16)), 'stg', variables('suffix')))]",
     "serverFarmName": "[concat(substring(parameters('baseName'), 0, min(length(parameters('baseName')),14)), '-srv-', variables('suffix'))]",
     "uniqueResourceNameBase": "[toLower(concat(parameters('baseName'), variables('suffix')))]",
+    "keyVaultName": "[if(empty(parameters('KeyVaultName')), variables('uniqueResourceNameBase'), parameters('KeyVaultName'))]",
     "swaName": "[toLower(concat(parameters('baseName'), '-swa-', variables('suffix')))]"
   },
   "resources": [
     {
       "type": "Microsoft.KeyVault/vaults",
-      "name": "[variables('uniqueResourceNameBase')]",
+      "name": "[variables('keyVaultName')]",
       "apiVersion": "2016-10-01",
       "location": "[resourceGroup().location]",
       "properties": {
@@ -104,7 +112,7 @@
             "value": "[parameters('ApplicationID')]"
           },
           "dependsOn": [
-            "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueResourceNameBase'))]"
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
           ]
         },
         {
@@ -116,7 +124,7 @@
             "value": "[parameters('Applicationsecret')]"
           },
           "dependsOn": [
-            "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueResourceNameBase'))]"
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
           ]
         },
         {
@@ -128,7 +136,7 @@
             "value": "[parameters('refreshtoken')]"
           },
           "dependsOn": [
-            "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueResourceNameBase'))]"
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
           ]
         },
         {
@@ -140,7 +148,7 @@
             "value": "[parameters('tenantid')]"
           },
           "dependsOn": [
-            "[resourceId('Microsoft.KeyVault/vaults', variables('uniqueResourceNameBase'))]"
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
           ]
         }
       ],
@@ -182,20 +190,24 @@
               "value": "~4"
             },
             {
+              "name": "WEBSITE_DEPLOYMENT_ID",
+              "value": "[variables('keyVaultName')]"
+            },
+            {
               "name": "ApplicationID",
-              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('uniqueResourceNameBase'), '.vault.azure.net/secrets/ApplicationId)')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('keyVaultName'), '.vault.azure.net/secrets/ApplicationId)')]"
             },
             {
               "name": "ApplicationSecret",
-              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('uniqueResourceNameBase'), '.vault.azure.net/secrets/ApplicationSecret)')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('keyVaultName'), '.vault.azure.net/secrets/ApplicationSecret)')]"
             },
             {
               "name": "RefreshToken",
-              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('uniqueResourceNameBase'), '.vault.azure.net/secrets/RefreshToken)')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('keyVaultName'), '.vault.azure.net/secrets/RefreshToken)')]"
             },
             {
               "name": "TenantID",
-              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('uniqueResourceNameBase'), '.vault.azure.net/secrets/tenantid)')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://',variables('keyVaultName'), '.vault.azure.net/secrets/tenantid)')]"
             },
             {
               "name": "FUNCTIONS_WORKER_RUNTIME",
