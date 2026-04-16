@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy to Static Web App swa-pons-prd-cfr-001
 
 on:
   push:
